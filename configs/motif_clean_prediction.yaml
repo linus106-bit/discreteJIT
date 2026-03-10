@@ -1,7 +1,7 @@
 seed: 42
 
 vocab:
-  base_vocab_size: 8
+  base_vocab_size: 1024
 
 model:
   max_seq_len: 140
