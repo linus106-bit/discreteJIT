@@ -1,0 +1,58 @@
+seed: 42
+
+vocab:
+  base_vocab_size: 8
+  add_noise_tokens: false
+  noise_bins: 11
+
+model:
+  max_seq_len: 140
+  d_model: 128
+  n_layers: 4
+  n_heads: 4
+  dropout: 0.1
+
+objective:
+  name: clean_prediction
+
+data:
+  generators: [repeating_motif]
+  train:
+    num_samples: 12000
+    min_length: 32
+    max_length: 64
+    fixed_p: 0.1
+    sampled_p: false
+    sampled_p_min: 0.0
+    sampled_p_max: 0.5
+    use_noise_level_token: false
+  val:
+    num_samples: 2000
+    min_length: 32
+    max_length: 64
+    fixed_p: 0.1
+    sampled_p: false
+    sampled_p_min: 0.0
+    sampled_p_max: 0.5
+    use_noise_level_token: false
+  eval:
+    num_samples: 2000
+    min_length: 32
+    max_length: 64
+    fixed_p: 0.1
+    sampled_p: false
+    sampled_p_min: 0.0
+    sampled_p_max: 0.5
+    use_noise_level_token: false
+
+training:
+  epochs: 8
+  batch_size: 64
+  eval_batch_size: 128
+  lr: 0.0005
+  weight_decay: 0.01
+  use_gpu: true
+
+evaluation:
+  lengths: [32, 64, 96, 128]
+  p_sweep: [0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
