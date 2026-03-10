@@ -35,8 +35,9 @@ def main():
     model.load_state_dict(torch.load(args.checkpoint, map_location=device)["model"])
     model.eval()
 
+    val_data_cfg = {**cfg["data"]["val"], "num_samples": args.num_samples}
     ds = StructuredDenoisingDataset(
-        DataConfig(num_samples=args.num_samples, **cfg["data"]["val"]),
+        DataConfig(**val_data_cfg),
         vocab,
         seed=cfg["seed"] + 9999,
     )
