@@ -73,7 +73,7 @@ def main():
             optimizer.step()
             loss_meter.update(loss.item(), input_ids.size(0))
 
-        val_metrics = evaluate_model(model, val_loader, device, vocab.pad_id)
+        val_metrics = evaluate_model(model, val_loader, device, vocab.pad_id, vocab)
         token_acc = val_metrics["token_accuracy"]
         row = {"epoch": epoch, "train_loss": loss_meter.avg, **val_metrics}
         history.append(row)
