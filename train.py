@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-from collections import defaultdict
 from pathlib import Path
 
 import torch
@@ -11,21 +10,16 @@ from torch.utils.data import DataLoader
 
 from data import DataConfig, StructuredDenoisingDataset, collate_batch
 from evaluate import evaluate_model
-from generators import SequenceGenerator
 from model import DenoisingTransformer
 from utils import AverageMeter, ensure_dir, load_config, save_json, set_seed
 from vocab import SymbolVocab
 
 
-def build_loader(cfg, split, vocab, seed, objective):
+def build_loader(cfg, split, vocab, seed):
     ds = StructuredDenoisingDataset(
         DataConfig(**cfg["data"][split]),
         vocab=vocab,
-        sequence_generator=SequenceGenerator(
-            cfg["data"]["generators"], cfg["data"].get("generator_weights")
-        ),
         seed=seed,
-        objective=objective,
     )
     return DataLoader(
         ds,
@@ -50,9 +44,8 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() and cfg["training"].get("use_gpu", True) else "cpu")
     vocab = SymbolVocab(**cfg["vocab"])
 
-    objective = cfg["objective"]["name"]
-    train_loader = build_loader(cfg, "train", vocab, cfg["seed"], objective)
-    val_loader = build_loader(cfg, "val", vocab, cfg["seed"] + 1000, objective)
+    train_loader = build_loader(cfg, "train", vocab, cfg["seed"])
+    val_loader = build_loader(cfg, "val", vocab, cfg["seed"] + 1000)
 
     model = DenoisingTransformer(vocab_size=vocab.size, **cfg["model"]).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg["training"]["lr"], weight_decay=cfg["training"].get("weight_decay", 0.01))
@@ -69,20 +62,11 @@ def main():
             attn = input_ids.ne(vocab.pad_id)
 
             logits = model(input_ids, attn)
-            if objective == "clean_prediction":
-                loss = F.cross_entropy(
-                    logits.view(-1, logits.size(-1)),
-                    target_ids.view(-1),
-                    ignore_index=vocab.pad_id,
-                )
-            elif objective == "corruption_mask_prediction":
-                loss = F.cross_entropy(
-                    logits[..., :2].contiguous().view(-1, 2),
-                    target_ids.view(-1),
-                    ignore_index=vocab.pad_id,
-                )
-            else:
-                raise ValueError(f"Unknown objective {objective}")
+            loss = F.cross_entropy(
+                logits.view(-1, logits.size(-1)),
+                target_ids.view(-1),
+                ignore_index=vocab.pad_id,
+            )
 
             optimizer.zero_grad()
             loss.backward()
@@ -90,8 +74,8 @@ def main():
             loss_meter.update(loss.item(), input_ids.size(0))
 
         val_metrics = evaluate_model(model, val_loader, device, vocab.pad_id)
-        token_acc = val_metrics["overall"]["token_accuracy"]
-        row = {"epoch": epoch, "train_loss": loss_meter.avg, **val_metrics["overall"]}
+        token_acc = val_metrics["token_accuracy"]
+        row = {"epoch": epoch, "train_loss": loss_meter.avg, **val_metrics}
         history.append(row)
         print(row)
 

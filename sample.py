@@ -6,7 +6,6 @@ import argparse
 import torch
 
 from data import DataConfig, StructuredDenoisingDataset, collate_batch
-from generators import SequenceGenerator
 from model import DenoisingTransformer
 from utils import load_config, set_seed
 from vocab import SymbolVocab
@@ -39,9 +38,7 @@ def main():
     ds = StructuredDenoisingDataset(
         DataConfig(num_samples=args.num_samples, **cfg["data"]["val"]),
         vocab,
-        SequenceGenerator(cfg["data"]["generators"], cfg["data"].get("generator_weights")),
         seed=cfg["seed"] + 9999,
-        objective="clean_prediction",
     )
     batch = collate_batch([ds[i] for i in range(args.num_samples)], vocab.pad_id)
     inp = batch["input_ids"].to(device)
@@ -55,7 +52,7 @@ def main():
         c = to_symbols(batch["clean_ids"][i][row_ids], vocab)
         x = to_symbols(batch["input_ids"][i][row_ids], vocab)
         y = to_symbols(pred[i][row_ids], vocab)
-        print(f"sample={i} generator={batch['generator'][i]} p={batch['p'][i]:.2f}")
+        print(f"sample={i}")
         print(" corrupted:", x)
         print(" predicted:", y)
         print(" clean    :", c)

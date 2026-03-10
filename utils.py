@@ -2,12 +2,10 @@
 from __future__ import annotations
 
 import json
-import os
 import random
-from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable
+from typing import Dict
 
 import torch
 import yaml
@@ -75,14 +73,5 @@ def compute_metrics(
     }
 
 
-def merge_metric_sums(acc: Dict[str, AverageMeter], metrics: Dict[str, float], n: int) -> None:
-    for k, v in metrics.items():
-        acc[k].update(v, n)
-
-
 def averages_to_dict(acc: Dict[str, AverageMeter]) -> Dict[str, float]:
     return {k: meter.avg for k, meter in acc.items()}
-
-
-def nested_defaultdict():
-    return defaultdict(lambda: defaultdict(AverageMeter))
