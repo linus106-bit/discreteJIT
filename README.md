@@ -22,6 +22,9 @@ pip install -r requirements.txt
 python train.py --config configs/motif_clean_prediction.yaml --output-dir outputs/motif_clean
 ```
 
+`data.train`에서 `p_min`/`p_max`를 주면 샘플마다 corruption 확률 `p`를 균일분포로 다시 뽑습니다.
+둘 다 생략하면 기존처럼 `fixed_p`를 고정값으로 사용합니다.
+
 ## Evaluate
 
 ```bash

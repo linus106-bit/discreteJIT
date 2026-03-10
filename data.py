@@ -19,7 +19,16 @@ class DataConfig:
     min_length: int
     max_length: int
     fixed_p: float = 0.1
+    p_min: float | None = None
+    p_max: float | None = None
     pattern_types: List[str] | None = None
+
+    def sample_p(self, rng: random.Random) -> float:
+        lo = self.fixed_p if self.p_min is None else self.p_min
+        hi = self.fixed_p if self.p_max is None else self.p_max
+        if lo > hi:
+            raise ValueError(f"Expected p_min <= p_max, got {lo} > {hi}")
+        return rng.uniform(lo, hi)
 
 
 class StructuredDenoisingDataset(Dataset):
@@ -45,7 +54,8 @@ class StructuredDenoisingDataset(Dataset):
             rng=rng,
             pattern_types=self.cfg.pattern_types,
         )
-        corrupted, corruption_mask = corrupt_sequence(clean, self.cfg.fixed_p, self.vocab.base_vocab_size, rng)
+        p = self.cfg.sample_p(rng)
+        corrupted, corruption_mask = corrupt_sequence(clean, p, self.vocab.base_vocab_size, rng)
 
         inp = [self.vocab.bos_id] + self.vocab.encode_symbols(corrupted) + [self.vocab.eos_id]
         target = [self.vocab.bos_id] + self.vocab.encode_symbols(clean) + [self.vocab.eos_id]
