@@ -2,11 +2,11 @@
 
 이 저장소는 **한 가지 학습 실험만** 남긴 최소 구성입니다.
 
-- 입력: 균일 토큰 corruption 이 들어간 시퀀스
+- 입력: 균일 토큰 corruption 이 들어간 시퀀스(학습은 부분 corruption, 평가는 완전 corruption)
 - 출력: clean 시퀀스
 - 목표: Transformer 가 corruption 을 직접 복원하도록 학습
 
-실험 여지를 위한 옵션(복수 generator, objective 비교, p-sweep 등)은 제거했습니다.
+현재 기본 설정은 repeating/mirrored/interleaved/arithmetic 패턴을 섞어 더 복잡한 구조를 학습합니다.
 
 ## Install
 

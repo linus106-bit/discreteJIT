@@ -16,16 +16,19 @@ data:
     min_length: 32
     max_length: 64
     fixed_p: 0.1
+    pattern_types: [repeating_motif, mirrored_motif, arithmetic_walk, interleaved_motifs]
   val:
     num_samples: 2000
     min_length: 32
     max_length: 64
     fixed_p: 0.1
+    pattern_types: [repeating_motif, mirrored_motif, arithmetic_walk, interleaved_motifs]
   eval:
     num_samples: 2000
     min_length: 32
     max_length: 64
     fixed_p: 0.1
+    pattern_types: [repeating_motif, mirrored_motif, arithmetic_walk, interleaved_motifs]
 
 training:
   epochs: 8

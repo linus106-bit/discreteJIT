@@ -71,8 +71,9 @@ def evaluate_model(model, loader, device, pad_id, vocab, num_visualizations=0):
 
 
 def build_eval_loader(cfg, vocab, seed):
+    eval_cfg = {**cfg["data"]["eval"], "fixed_p": 1.0}
     ds = StructuredDenoisingDataset(
-        DataConfig(**cfg["data"]["eval"]),
+        DataConfig(**eval_cfg),
         vocab=vocab,
         seed=seed,
     )

@@ -9,7 +9,7 @@ import torch
 from torch.utils.data import Dataset
 
 from corruption import corrupt_sequence
-from generators import repeating_motif
+from generators import generate_structured_sequence
 from vocab import SymbolVocab
 
 
@@ -19,6 +19,7 @@ class DataConfig:
     min_length: int
     max_length: int
     fixed_p: float = 0.1
+    pattern_types: List[str] | None = None
 
 
 class StructuredDenoisingDataset(Dataset):
@@ -38,7 +39,12 @@ class StructuredDenoisingDataset(Dataset):
     def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
         rng = random.Random(self.seed + idx)
         length = rng.randint(self.cfg.min_length, self.cfg.max_length)
-        clean = repeating_motif(length, self.vocab.base_vocab_size, rng)
+        clean = generate_structured_sequence(
+            length=length,
+            vocab_size=self.vocab.base_vocab_size,
+            rng=rng,
+            pattern_types=self.cfg.pattern_types,
+        )
         corrupted, corruption_mask = corrupt_sequence(clean, self.cfg.fixed_p, self.vocab.base_vocab_size, rng)
 
         inp = [self.vocab.bos_id] + self.vocab.encode_symbols(corrupted) + [self.vocab.eos_id]
